@@ -58,6 +58,9 @@
   <ItemGroup>
     <Compile Include="Bar.cs" />
     <Compile Include="BarComponent.cs" />
+    <Compile Include="MyComponent1.cs" />
+    <Compile Include="Node.cs" />
+    <Compile Include="NodeComponent.cs" />
     <Compile Include="TrussDeformationComponent.cs" />
     <Compile Include="TrussDeformationInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
