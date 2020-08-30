@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using LinearAlgebra = MathNet.Numerics.LinearAlgebra;
 
 using Grasshopper.Kernel;
 using Rhino.Geometry;
@@ -21,9 +22,9 @@ namespace TrussDeformation
 		/// new tabs/panels will automatically be created.
 		/// </summary>
 		public TrussDeformationComponent()
-		  : base("TrussDeformation", "Nickname",
-			  "Description",
-			  "Category", "Subcategory")
+		  : base("TrussDeformation", "TrussDeformation",
+			  "Solves the Equalibrium of the Truss Structure",
+			  "Truss", "Solver")
 		{
 		}
 
@@ -32,22 +33,37 @@ namespace TrussDeformation
 		/// </summary>
 		protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
 		{
+			pManager.AddGenericParameter("Bar", "bar", "Bar Object", GH_ParamAccess.list);
 		}
 
-		/// <summary>
-		/// Registers all the output parameters for this component.
-		/// </summary>
 		protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
 		{
 		}
 
-		/// <summary>
-		/// This is the method that actually does the work.
-		/// </summary>
-		/// <param name="DA">The DA object can be used to retrieve data from input parameters and 
-		/// to store data in output parameters.</param>
 		protected override void SolveInstance(IGH_DataAccess DA)
 		{
+			List<Bar> barObjects = new List<Bar>();
+			DA.GetDataList("Bar", barObjects);
+
+			// Loop trough each bar and construct a topology matrix eDof
+			List<List<int>> eDof = new List<List<int>>();
+
+			for (int i = 0; i < barObjects.Count; i++)
+			{
+				List<int> dofs1 = barObjects[i].Nodes[0].Dofs;
+				List<int> dofs2 = barObjects[i].Nodes[1].Dofs;
+
+
+				List<int> eDofRow = new List<int>();
+				eDofRow.AddRange(dofs1);
+				eDofRow.AddRange(dofs2);
+				eDof.Add(eDofRow);
+
+					
+			}
+
+			int a = 1;
+			
 		}
 
 		/// <summary>

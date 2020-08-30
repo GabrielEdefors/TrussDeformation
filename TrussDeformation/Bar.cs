@@ -21,8 +21,8 @@ namespace TrussDeformation
 				   double area,
 				   double stiffnessModulus)
 		{
-			Nodes[0] = node1;
-			Nodes[1] = node2;
+			Nodes.Add(node1);
+			Nodes.Add(node2);
 			StiffnessModulus = stiffnessModulus;
 			Area = area;
 		}

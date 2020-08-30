@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Deployment.Internal;
 using System.IO;
 using System.Linq;
@@ -65,6 +66,10 @@ namespace TrussDeformation
 			List<Node> trussNodes = new List<Node>();
 			List<Bar> trussBars = new List<Bar>();
 
+			// To keep track if the node is unique
+			bool unique1 = true;
+			bool unique2 = true;
+
 			// Loop trough each Node pair
 			for (int i = 0; i < nodes1.Count; i++)
 			{
@@ -72,47 +77,53 @@ namespace TrussDeformation
 				Node node1 = nodes1[i];
 				Node node2 = nodes2[i];
 
-				// Check if node unique, if so give it an ID and degress of freedom
-				foreach (Node node in trussNodes)
+
+				// Check if node is unique, if so give it an ID and degress of freedom
+				foreach (Node existingNode in trussNodes)
 				{
+
 					// If not unique use an already identified node
-					if (node1 == node)
-						node1 = node;
-					else
+					if (node1 == existingNode)
 					{
-						int id_node_1 = trussNodes.Count;
-						node1.ID = id_node_1;
-						node1.Dofs = System.Linq.Enumerable.Range(id_node_1, 3).ToList();
-						trussNodes.Add(node1);
-					}
-					
-
-					if (node2 == node)
-						node2 = node;
-					else
-					{
-						int id_node_2 = trussNodes.Count;
-						node2.ID = id_node_2;
-						node2.Dofs = System.Linq.Enumerable.Range(id_node_2, 3).ToList();
-						trussNodes.Add(node2);
+						node1 = existingNode;
+						unique1 = false;
 					}
 
-					// Create a bar object between the nodes
-					Bar bar = new Bar(node1, node2, A[i], E[i]);
-					trussBars.Add(bar);
+					if (node2 == existingNode)
+					{
+						node2 = existingNode;
+						unique2 = false;
+					}
+				}
 
-					
+				// If unique give it an ID
+				if (unique1)
+				{
+					int id_node_1 = trussNodes.Count;
+					node1.ID = id_node_1;
+					node1.Dofs = System.Linq.Enumerable.Range(id_node_1, 3).ToList();
+					trussNodes.Add(node1);
+				}
+
+				if (unique2)
+				{
+					int id_node_2 = trussNodes.Count;
+					node2.ID = id_node_2;
+					node2.Dofs = System.Linq.Enumerable.Range(id_node_2*3, 3).ToList();
+					trussNodes.Add(node2);
 				}
 
 
-			}
-
-
-
-
-
+				// Create a bar object between the nodes
+				Bar bar = new Bar(node1, node2, A[i], E[i]);
+				trussBars.Add(bar);
 
 			}
+
+			DA.SetDataList("Bar", trussBars);
+
+
+		}
 
 		/// <summary>
 		/// Provides an Icon for the component.

@@ -12,9 +12,9 @@ namespace TrussDeformation
 		/// Initializes a new instance of the NodeComponent class.
 		/// </summary>
 		public NodeComponent()
-		  : base("NodeComponent", "Nickname",
-			  "Description",
-			  "Category", "Subcategory")
+		  : base("NodeComponent", "NodeComponent",
+			  "Creates a Node Object",
+			  "Truss", "Elements")
 		{
 		}
 
@@ -27,6 +27,9 @@ namespace TrussDeformation
 			pManager.AddBooleanParameter("Restrained in x", "restrained in x", "True if restrained in x direction", GH_ParamAccess.list);
 			pManager.AddBooleanParameter("Restrained in y", "restrained in y", "True if restrained in y direction", GH_ParamAccess.list);
 			pManager.AddBooleanParameter("Restrained in z", "restrained in z", "True if restrained in z direction", GH_ParamAccess.list);
+			pManager.AddNumberParameter("Force in x", "force in x", "Magnitude of force acting in x", GH_ParamAccess.list);
+			pManager.AddNumberParameter("Force in y", "force in y", "Magnitude of force acting in y", GH_ParamAccess.list);
+			pManager.AddNumberParameter("Force in z", "force in z", "Magnitude of force acting in z", GH_ParamAccess.list);
 		}
 
 		/// <summary>
@@ -47,21 +50,27 @@ namespace TrussDeformation
 			List<bool> restrainedx = new List<bool>();
 			List<bool> restrainedy = new List<bool>();
 			List<bool> restrainedz = new List<bool>();
+			List<double> forceX = new List<double>();
+			List<double> forceY = new List<double>();
+			List<double> forceZ = new List<double>();
 
 			DA.GetDataList("Point", points);
 			DA.GetDataList("Restrained in x", restrainedx);
 			DA.GetDataList("Restrained in y", restrainedy);
 			DA.GetDataList("Restrained in z", restrainedz);
+			DA.GetDataList("Force in x", forceX);
+			DA.GetDataList("Force in y", forceY);
+			DA.GetDataList("Force in z", forceZ);
 
 			// Create a node object and store it in a list
 			List<Node> nodes = new List<Node>();
 
 			for (int i = 0; i < points.Count; i++)
-			{
-				nodes.Add(new Node(points[i], restrainedx[i], restrainedy[i], restrainedz[i]));
+			{	
+				nodes.Add(new Node(points[i], restrainedx[i], restrainedy[i], restrainedz[i], forceX[i], forceY[i], forceZ[i]));
 			}
 
-			
+			DA.SetDataList("Node", nodes);
 
 		}
 
