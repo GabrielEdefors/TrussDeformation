@@ -39,7 +39,9 @@ namespace TrussDeformation
 		/// </summary>
 		protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
 		{
-			pManager.AddGenericParameter("Bar", "Bar", "Bar object", GH_ParamAccess.list);
+			pManager.AddGenericParameter("Bars", "bars", "Bar object", GH_ParamAccess.list);
+			pManager.AddGenericParameter("eDof", "edof", "Topology Matrix", GH_ParamAccess.list);
+			pManager.AddGenericParameter("Node", "nodes", "Node List", GH_ParamAccess.list);
 		}
 
 		protected override void SolveInstance(IGH_DataAccess DA)
@@ -69,6 +71,10 @@ namespace TrussDeformation
 			// To keep track if the node is unique
 			bool unique1 = true;
 			bool unique2 = true;
+
+			// Topology matrix to keep track of element dofs
+			List<List<int>> eDof = new List<List<int>>();
+
 
 			// Loop trough each Node pair
 			for (int i = 0; i < nodes1.Count; i++)
@@ -118,10 +124,18 @@ namespace TrussDeformation
 				Bar bar = new Bar(node1, node2, A[i], E[i]);
 				trussBars.Add(bar);
 
+				// Topology matrix
+				List<int> dofs1 = bar.Nodes[0].Dofs;
+				List<int> dofs2 = bar.Nodes[1].Dofs;
+				List<int> eDofRow = new List<int>();
+				eDofRow.AddRange(dofs1);
+				eDofRow.AddRange(dofs2);
+				eDof.Add(eDofRow);
 			}
 
-			DA.SetDataList("Bar", trussBars);
-
+			DA.SetDataList("Bars", trussBars);
+			DA.SetDataList("eDof", eDof);
+			DA.SetDataList("Nodes", trussNodes);
 
 		}
 

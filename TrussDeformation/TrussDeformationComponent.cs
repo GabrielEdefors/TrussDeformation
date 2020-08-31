@@ -4,6 +4,7 @@ using LinearAlgebra = MathNet.Numerics.LinearAlgebra;
 
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using System.Linq;
 
 // In order to load the result of this wizard, you will also need to
 // add the output bin/ folder of this project to the list of loaded
@@ -14,13 +15,6 @@ namespace TrussDeformation
 {
 	public class TrussDeformationComponent : GH_Component
 	{
-		/// <summary>
-		/// Each implementation of GH_Component must provide a public 
-		/// constructor without any arguments.
-		/// Category represents the Tab in which the component will appear, 
-		/// Subcategory the panel. If you use non-existing tab or panel names, 
-		/// new tabs/panels will automatically be created.
-		/// </summary>
 		public TrussDeformationComponent()
 		  : base("TrussDeformation", "TrussDeformation",
 			  "Solves the Equalibrium of the Truss Structure",
@@ -34,6 +28,8 @@ namespace TrussDeformation
 		protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
 		{
 			pManager.AddGenericParameter("Bar", "bar", "Bar Object", GH_ParamAccess.list);
+			pManager.AddGenericParameter("eDof", "edof", "Topology Matrix", GH_ParamAccess.list);
+			pManager.AddGenericParameter("Nodes", "nodes", "Truss Nodes", GH_ParamAccess.list);
 		}
 
 		protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -43,27 +39,40 @@ namespace TrussDeformation
 		protected override void SolveInstance(IGH_DataAccess DA)
 		{
 			List<Bar> barObjects = new List<Bar>();
-			DA.GetDataList("Bar", barObjects);
-
-			// Loop trough each bar and construct a topology matrix eDof
+			List<Node> nodeObjects = new List<Node>();
 			List<List<int>> eDof = new List<List<int>>();
+			DA.GetDataList("Bar", barObjects);
+			DA.GetDataList("Nodes", nodeObjects);
+			DA.GetDataList("eDof", eDof);
+
+			int nDof = eDof.Max().Max();
+
+
+			// Loop trough each bar and construct a load vector
+			LinearAlgebra.Vector<double> forceVector = LinearAlgebra.Vector<double>.Build.Dense(nDof);
+
+
+			for (int i = 0; i < nodeObjects.Count; i++)
+			{
+
+				// Load vector
+				forceVector[i] = nodeObjects[i].ForceX;
+				forceVector[i+1] = nodeObjects[i].ForceY;
+				forceVector[i+2] = nodeObjects[i].ForceZ;
+
+			}
+
+			// Loop trough each element, compute local stiffness matrix and assemble into global stiffness matrix
+			LinearAlgebra.Matrix<double> Kglobal = LinearAlgebra.Matrix<double>.Build.Dense(nDof, nDof);
 
 			for (int i = 0; i < barObjects.Count; i++)
 			{
-				List<int> dofs1 = barObjects[i].Nodes[0].Dofs;
-				List<int> dofs2 = barObjects[i].Nodes[1].Dofs;
+				LinearAlgebra.Matrix<double> Klocal = barObjects[i].ComputeStiffnessMatrix();
 
-
-				List<int> eDofRow = new List<int>();
-				eDofRow.AddRange(dofs1);
-				eDofRow.AddRange(dofs2);
-				eDof.Add(eDofRow);
-
-					
+				// Assemble
+				Kglobal.SubMatrix(eDof[i][0]);
 			}
 
-			int a = 1;
-			
 		}
 
 		/// <summary>
@@ -80,11 +89,6 @@ namespace TrussDeformation
 			}
 		}
 
-		/// <summary>
-		/// Each component must have a unique Guid to identify it. 
-		/// It is vital this Guid doesn't change otherwise old ghx files 
-		/// that use the old ID will partially fail during loading.
-		/// </summary>
 		public override Guid ComponentGuid
 		{
 			get { return new Guid("5791e210-aadb-40c6-b83c-da866162ee63"); }
