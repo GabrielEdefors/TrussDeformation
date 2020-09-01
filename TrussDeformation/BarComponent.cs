@@ -28,8 +28,7 @@ namespace TrussDeformation
 		/// </summary>
 		protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
 		{
-			pManager.AddGenericParameter("Node 1", "node 1", "First node of the bar", GH_ParamAccess.list);
-			pManager.AddGenericParameter("Node 2", "node 2", "Seconds node of the bar", GH_ParamAccess.list);
+			pManager.AddGenericParameter("Line", "line", "Line of the bar", GH_ParamAccess.list);
 			pManager.AddNumberParameter("Area", "A", "Cross sectional area of the bar", GH_ParamAccess.list);
 			pManager.AddNumberParameter("Youngs Modulus", "E", "Stiffness of the bar", GH_ParamAccess.list);
 		}
@@ -50,18 +49,16 @@ namespace TrussDeformation
 			// Retrive data from component
 			List<double> A = new List<double>();
 			List<double> E = new List<double>();
-			List<Node> nodes1 = new List<Node>();
-			List<Node> nodes2 = new List<Node>();
+			List<Line> lines = new List<Line>();
 
-			DA.GetDataList("Node 1", nodes1);
-			DA.GetDataList("Node 2", nodes2);
+			DA.GetDataList("Line", lines);
 			DA.GetDataList("Area", A);
 			DA.GetDataList("Youngs Modulus", E);
 
 			// The length of A and E must be the same as the Node 1 and Node 2
-			if ((A.Count != E.Count) | (E.Count != nodes1.Count) | (E.Count != nodes2.Count))
+			if ((A.Count != E.Count) | (E.Count != lines.Count))
 			{
-				throw new ArgumentException("Length of A and E must equal length of Node 1 and Node 2");
+				throw new ArgumentException("Length of A and E must equal length of Line");
 			}
 
 			// Create one list to store the nodes and one list to store the bars

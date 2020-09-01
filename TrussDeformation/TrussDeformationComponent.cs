@@ -46,6 +46,7 @@ namespace TrussDeformation
 			DA.GetDataList("eDof", eDof);
 
 			int nDof = eDof.Max().Max();
+			int nElem = eDof.Count;
 
 
 			// Loop trough each bar and construct a load vector
@@ -63,15 +64,25 @@ namespace TrussDeformation
 			}
 
 			// Loop trough each element, compute local stiffness matrix and assemble into global stiffness matrix
-			LinearAlgebra.Matrix<double> Kglobal = LinearAlgebra.Matrix<double>.Build.Dense(nDof, nDof);
+			LinearAlgebra.Matrix<double> K = LinearAlgebra.Matrix<double>.Build.Dense(nDof, nDof);
 
 			for (int i = 0; i < barObjects.Count; i++)
 			{
-				LinearAlgebra.Matrix<double> Klocal = barObjects[i].ComputeStiffnessMatrix();
+				LinearAlgebra.Matrix<double> KElem = barObjects[i].ComputeStiffnessMatrix();
 
 				// Assemble
-				Kglobal.SubMatrix(eDof[i][0]);
+				for (int rowIndex = 0; rowIndex < nElem; rowIndex++)
+				{
+					for (int colIndex = 0; colIndex < 6; colIndex++)
+					{
+						K[eDof[rowIndex][0], eDof[rowIndex][colIndex]] = KElem[rowIndex, eDof[rowIndex][colIndex]];  
+					}
+					
+				}
+				
 			}
+
+			int t = 1;
 
 		}
 

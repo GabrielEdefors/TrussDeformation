@@ -48,7 +48,24 @@ namespace TrussDeformation
 			K[1, 0] = - Area * StiffnessModulus / ElemLength;
 			K[1, 1] = Area * StiffnessModulus / ElemLength;
 
-			return K;
+			// Tranform to global element stiffness matrix using transformation matrix G
+			LinearAlgebra.Matrix<double> G = LinearAlgebra.Matrix<double>.Build.Dense(2, 6);
+
+			double nxx = (x2 - x1) / ElemLength;
+			double nyx = (y2 - y1) / ElemLength;
+			double nzx = (z2 - z1) / ElemLength;
+
+			G[0, 0] = nxx;
+			G[0, 1] = nyx;
+			G[0, 2] = nzx;
+			G[1, 0] = nxx;
+			G[1, 1] = nyx;
+			G[1, 2] = nzx;
+
+			LinearAlgebra.Matrix<double> GT = G.Transpose();
+			LinearAlgebra.Matrix<double> KGlobal = (GT.Multiply(K)).Multiply(G);
+
+			return KGlobal;
 		}
 	}
 }
