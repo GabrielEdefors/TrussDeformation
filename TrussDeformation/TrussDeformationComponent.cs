@@ -45,7 +45,7 @@ namespace TrussDeformation
 			List<double> A = new List<double>();
 			List<double> E = new List<double>();
 			List<Line> lines = new List<Line>();
-			List<RestraintNode> rNodes = new List<RestraintNode>();
+			List<ContstraintNode> rNodes = new List<ContstraintNode>();
 			List<LoadNode> loadNodes = new List<LoadNode>();
 
 			DA.GetDataList("Line", lines);
@@ -105,14 +105,14 @@ namespace TrussDeformation
 					node1.Dofs = System.Linq.Enumerable.Range(id_node_1, 3).ToList();
 
 					// Check if any boundary node or load node exist at current node
-					foreach (RestraintNode rNode in rNodes)
+					foreach (ContstraintNode rNode in rNodes)
 					{
 						if (rNode == node1)
 						{
 							// Add restraint data
-							node1.RestrainedX = rNode.RestrainedX;
-							node1.RestrainedY = rNode.RestrainedY;
-							node1.RestrainedZ = rNode.RestrainedZ;
+							node1.ConstraintX = rNode.ConstraintX;
+							node1.ConstraintY = rNode.ConstraintY;
+							node1.ConstraintZ = rNode.ConstraintZ;
 						}
 					}
 
@@ -140,14 +140,14 @@ namespace TrussDeformation
 					node2.Dofs = System.Linq.Enumerable.Range(id_node_2 * 3, 3).ToList();
 
 					// Check if any boundary node or load node exist at current node
-					foreach (RestraintNode rNode in rNodes)
+					foreach (ContstraintNode rNode in rNodes)
 					{
 						if (rNode == node2)
 						{
 							// Add restraint data
-							node2.RestrainedX = rNode.RestrainedX;
-							node2.RestrainedY = rNode.RestrainedY;
-							node2.RestrainedZ = rNode.RestrainedZ;
+							node2.ConstraintX = rNode.ConstraintX;
+							node2.ConstraintY = rNode.ConstraintY;
+							node2.ConstraintZ = rNode.ConstraintZ;
 						}
 					}
 
@@ -188,9 +188,10 @@ namespace TrussDeformation
 			int nElem = eDof.Count;
 
 
-			// Loop trough each bar and construct a load vector
+			// Loop trough each node and construct a load vector and boundary vector
 			LinearAlgebra.Vector<double> forceVector = LinearAlgebra.Vector<double>.Build.Dense(nDof);
-
+			List<int> boundaryDofs = new List<int>();
+			List<double?> boundaryConstraints = new List<double?>();
 
 			for (int i = 0; i < trussNodes.Count; i++)
 			{
@@ -199,6 +200,15 @@ namespace TrussDeformation
 				forceVector[i*3] = trussNodes[i].ForceX;
 				forceVector[i*3+1] = trussNodes[i].ForceY;
 				forceVector[i*3+2] = trussNodes[i].ForceZ;
+
+				// Boundary vector
+				if(trussNodes[i].ConstraintX != null)
+				{
+					boundaryDofs.AddRange(trussNodes[i].Dofs);
+					boundaryConstraints.Add(trussNodes[i].ConstraintX);
+					boundaryConstraints.Add(trussNodes[i].ConstraintY);
+					boundaryConstraints.Add(trussNodes[i].ConstraintZ);
+				}
 
 			}
 
@@ -215,13 +225,14 @@ namespace TrussDeformation
 					for (int colIndex = 0; colIndex < 6; colIndex++)
 					{
 						K[eDof[rowIndex][0], eDof[rowIndex][colIndex]] = KElem[rowIndex, colIndex];  
-					}
-					
-				}
-				
+					}	
+				}			
 			}
 
-
+			// Calculate the displacements
+			Solver solver = new Solver();
+			LinearAlgebra.Vector<double> displacements = solver.solveEquations(K, forceVector, boundaryDofs, boundaryConstraints.Cast<double>().ToList());
+			int t = 1;
 		}
 
 		/// <summary>

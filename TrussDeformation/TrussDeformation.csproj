@@ -64,10 +64,10 @@
     <Compile Include="Bar.cs" />
     <Compile Include="LoadNode.cs" />
     <Compile Include="LoadNodeComponent.cs" />
-    <Compile Include="MyComponent1.cs" />
     <Compile Include="Node.cs" />
-    <Compile Include="NodeComponent.cs" />
-    <Compile Include="RestraintNode.cs" />
+    <Compile Include="ConstraintNodeComponent.cs" />
+    <Compile Include="ContstraintNode.cs" />
+    <Compile Include="Solver.cs" />
     <Compile Include="TrussDeformationComponent.cs" />
     <Compile Include="TrussDeformationInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -7,27 +7,27 @@ using Rhino.Geometry;
 
 namespace TrussDeformation
 {
-	class RestraintNode
+	class ContstraintNode
 	{
 		// Properties	
 		public Point3d Point { get; set; } = new Point3d();
-		public bool RestrainedX { get; set; } = false;
-		public bool RestrainedY { get; set; } = false;
-		public bool RestrainedZ { get; set; } = false;
+		public double? ConstraintX { get; set; } = null;
+		public double? ConstraintY { get; set; } = null;
+		public double? ConstraintZ { get; set; } = null;
 
 		// Constructor
-		public RestraintNode(Point3d point,
-					bool restrainedx,
-					bool restrainedy,
-					bool restrainedz)
+		public ContstraintNode(Point3d point,
+					double constraintx,
+					double constrainty,
+					double constraintz)
 		{
 			Point = point;
-			RestrainedX = restrainedx;
-			RestrainedY = restrainedy;
-			RestrainedZ = restrainedz;
+			ConstraintX = constraintx;
+			ConstraintY = constrainty;
+			ConstraintZ = constraintz;
 		}
 
-		public static bool operator ==(RestraintNode node1, Node node2)
+		public static bool operator ==(ContstraintNode node1, Node node2)
 		{
 			// If they have the same point they count as the same node
 			if (node1.Point.Equals(node2.Point))
@@ -37,7 +37,7 @@ namespace TrussDeformation
 			return false;
 		}
 
-		public static bool operator !=(RestraintNode node1, Node node2)
+		public static bool operator !=(ContstraintNode node1, Node node2)
 		{
 			// If they have the same point they count as the same node
 			if (node1.Point.Equals(node2.Point) == false)

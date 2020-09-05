@@ -11,9 +11,9 @@ namespace TrussDeformation
 	{
 		// Properties	
 		public Point3d Point { get; set; } = new Point3d();
-		public bool RestrainedX { get; set; } = false;
-		public bool RestrainedY { get; set; } = false;
-		public bool RestrainedZ { get; set; } = false;
+		public double? ConstraintX { get; set; } = null;
+		public double? ConstraintY { get; set; } = null;
+		public double? ConstraintZ { get; set; } = null;
 		public double ForceX { get; set; } = 0.0;
 		public double ForceY { get; set; } = 0.0;
 		public double ForceZ { get; set; } = 0.0;

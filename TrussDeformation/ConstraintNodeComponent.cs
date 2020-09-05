@@ -6,14 +6,14 @@ using Rhino.Geometry;
 
 namespace TrussDeformation
 {
-	public class RestraintNodeComponent : GH_Component
+	public class ConstraintNodeComponent : GH_Component
 	{
 		/// <summary>
 		/// Initializes a new instance of the NodeComponent class.
 		/// </summary>
-		public RestraintNodeComponent()
-		  : base("RestraintNode", "RestraintNode",
-			  "Creates a node object that adds restraints to a node",
+		public ConstraintNodeComponent()
+		  : base("ConstraintNode", "ConstraintNode",
+			  "Creates a node object that adds constraint to a node",
 			  "Truss", "Elements")
 		{
 		}
@@ -24,9 +24,9 @@ namespace TrussDeformation
 		protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
 		{
 			pManager.AddPointParameter("Point", "point", "The spatial representation of the node", GH_ParamAccess.list);
-			pManager.AddBooleanParameter("Restrained in x", "restrained in x", "True if restrained in x direction", GH_ParamAccess.list);
-			pManager.AddBooleanParameter("Restrained in y", "restrained in y", "True if restrained in y direction", GH_ParamAccess.list);
-			pManager.AddBooleanParameter("Restrained in z", "restrained in z", "True if restrained in z direction", GH_ParamAccess.list);
+			pManager.AddNumberParameter("Constraint in x", "constraint in x", "True if restrained in x direction", GH_ParamAccess.list);
+			pManager.AddNumberParameter("Constraint in y", "constraint in y", "True if restrained in y direction", GH_ParamAccess.list);
+			pManager.AddNumberParameter("Constraint in z", "constraint in z", "True if restrained in z direction", GH_ParamAccess.list);
 		}
 
 		/// <summary>
@@ -34,7 +34,7 @@ namespace TrussDeformation
 		/// </summary>
 		protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
 		{
-			pManager.AddGenericParameter("restraintNode", "restraintNode", "Node", GH_ParamAccess.list);
+			pManager.AddGenericParameter("constraintNode", "constraintNode", "Node", GH_ParamAccess.list);
 		}
 
 		/// <summary>
@@ -44,24 +44,24 @@ namespace TrussDeformation
 		protected override void SolveInstance(IGH_DataAccess DA)
 		{
 			List<Point3d> points = new List<Point3d>();
-			List<bool> restrainedx = new List<bool>();
-			List<bool> restrainedy = new List<bool>();
-			List<bool> restrainedz = new List<bool>();
+			List<double> constraintx = new List<double>();
+			List<double> constrainty = new List<double>();
+			List<double> constraintz = new List<double>();
 
 			DA.GetDataList("Point", points);
-			DA.GetDataList("Restrained in x", restrainedx);
-			DA.GetDataList("Restrained in y", restrainedy);
-			DA.GetDataList("Restrained in z", restrainedz);
+			DA.GetDataList("Constraint in x", constraintx);
+			DA.GetDataList("Constraint in y", constrainty);
+			DA.GetDataList("Constraint in z", constraintz);
 
 			// Create a restraint node object and store it in a list
-			List<RestraintNode> nodes = new List<RestraintNode>();
+			List<ContstraintNode> nodes = new List<ContstraintNode>();
 
 			for (int i = 0; i < points.Count; i++)
 			{	
-				nodes.Add(new RestraintNode(points[i], restrainedx[i], restrainedy[i], restrainedz[i]));
+				nodes.Add(new ContstraintNode(points[i], constraintx[i], constrainty[i], constraintz[i]));
 			}
 
-			DA.SetDataList("restraintNode", nodes);
+			DA.SetDataList("constraintNode", nodes);
 
 		}
 
