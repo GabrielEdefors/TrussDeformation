@@ -58,9 +58,9 @@ namespace TrussDeformation
 			G[0, 0] = nxx;
 			G[0, 1] = nyx;
 			G[0, 2] = nzx;
-			G[1, 0] = nxx;
-			G[1, 1] = nyx;
-			G[1, 2] = nzx;
+			G[1, 3] = nxx;
+			G[1, 4] = nyx;
+			G[1, 5] = nzx;
 
 			LinearAlgebra.Matrix<double> GT = G.Transpose();
 			LinearAlgebra.Matrix<double> KGlobal = (GT.Multiply(K)).Multiply(G);

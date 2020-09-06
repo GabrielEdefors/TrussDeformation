@@ -32,10 +32,12 @@ namespace TrussDeformation
 			pManager.AddGenericParameter("Load Nodes", "load nodes", "Load nodes objects", GH_ParamAccess.list);
 			pManager.AddNumberParameter("Area", "A", "Cross sectional area of the bar", GH_ParamAccess.list);
 			pManager.AddNumberParameter("Youngs Modulus", "E", "Stiffness of the bar", GH_ParamAccess.list);
+			pManager.AddNumberParameter("Scale Factor", "SF", "Scale Deformations With Scale Factor", GH_ParamAccess.item);
 		}
 
 		protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
 		{
+			pManager.AddLineParameter("Deformed Truss", "deformed truss", "Deformed Truss", GH_ParamAccess.list);
 		}
 
 		protected override void SolveInstance(IGH_DataAccess DA)
@@ -47,12 +49,14 @@ namespace TrussDeformation
 			List<Line> lines = new List<Line>();
 			List<ContstraintNode> rNodes = new List<ContstraintNode>();
 			List<LoadNode> loadNodes = new List<LoadNode>();
+			double scaleFactor = 1.0;
 
 			DA.GetDataList("Line", lines);
 			DA.GetDataList("Area", A);
 			DA.GetDataList("Youngs Modulus", E);
 			DA.GetDataList("Restraint Nodes", rNodes);
 			DA.GetDataList("Load Nodes", loadNodes);
+			DA.GetData("Scale Factor", ref scaleFactor);
 
 			// The length of A and E must be the same as lines
 			if ((A.Count != E.Count) | (E.Count != lines.Count))
@@ -64,10 +68,6 @@ namespace TrussDeformation
 			List<Node> trussNodes = new List<Node>();
 			List<Bar> trussBars = new List<Bar>();
 
-			// To keep track if the node is unique
-			bool unique1 = true;
-			bool unique2 = true;
-
 			// Topology matrix to keep track of element dofs
 			List<List<int>> eDof = new List<List<int>>();
 
@@ -77,6 +77,10 @@ namespace TrussDeformation
 
 				Node node1 = new Node(lines[i].From);
 				Node node2 = new Node(lines[i].To);
+
+				// To keep track if the node is unique
+				bool unique1 = true;
+				bool unique2 = true;
 
 
 				// Check if node is unique, if so give it an ID and degress of freedom
@@ -102,7 +106,7 @@ namespace TrussDeformation
 				{
 					int id_node_1 = trussNodes.Count;
 					node1.ID = id_node_1;
-					node1.Dofs = System.Linq.Enumerable.Range(id_node_1, 3).ToList();
+					node1.Dofs = System.Linq.Enumerable.Range(id_node_1 * 3, 3).ToList();
 
 					// Check if any boundary node or load node exist at current node
 					foreach (ContstraintNode rNode in rNodes)
@@ -220,11 +224,11 @@ namespace TrussDeformation
 				LinearAlgebra.Matrix<double> KElem = trussBars[i].ComputeStiffnessMatrix();
 
 				// Assemble
-				for (int rowIndex = 0; rowIndex < nElem; rowIndex++)
+				for (int k = 0; k < 6; k++)
 				{
-					for (int colIndex = 0; colIndex < 6; colIndex++)
+					for (int l = 0; l < 6; l++)
 					{
-						K[eDof[rowIndex][0], eDof[rowIndex][colIndex]] = KElem[rowIndex, colIndex];  
+						K[eDof[i][k], eDof[i][l]] = K[eDof[i][k], eDof[i][l]]  + KElem[k, l];
 					}	
 				}			
 			}
@@ -232,7 +236,34 @@ namespace TrussDeformation
 			// Calculate the displacements
 			Solver solver = new Solver();
 			LinearAlgebra.Vector<double> displacements = solver.solveEquations(K, forceVector, boundaryDofs, boundaryConstraints.Cast<double>().ToList());
-			int t = 1;
+
+			// Save the displacement for each node
+			for (int i = 0; i < nElem; i++)
+			{
+				double disp1 = displacements[eDof[i][0]];
+				double disp2 = displacements[eDof[i][1]];
+				double disp3 = displacements[eDof[i][2]];
+				double disp4 = displacements[eDof[i][3]];
+				double disp5 = displacements[eDof[i][4]];
+				double disp6 = displacements[eDof[i][5]];
+
+				Point3d newPoint1 = new Point3d(disp1 * scaleFactor, disp2 * scaleFactor, disp3 * scaleFactor);
+				Point3d newPoint2 = new Point3d(disp4 * scaleFactor, disp5 * scaleFactor, disp6 * scaleFactor);
+
+				// Tranlate original points
+				trussBars[i].Nodes[0].Point = trussBars[i].Nodes[0].Point + newPoint1;
+				trussBars[i].Nodes[1].Point = trussBars[i].Nodes[1].Point + newPoint2;
+
+			}
+
+			// Return the deformed lines
+			List<Line> deformedLines = new List<Line>();
+			foreach (Bar bar in trussBars)
+			{
+				deformedLines.Add(new Line(bar.Nodes[0].Point, bar.Nodes[1].Point));
+			}
+			DA.SetDataList("Deformed Truss", deformedLines);
+
 		}
 
 		/// <summary>
