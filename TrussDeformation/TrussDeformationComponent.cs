@@ -38,6 +38,7 @@ namespace TrussDeformation
 		protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
 		{
 			pManager.AddLineParameter("Deformed Truss", "deformed truss", "Deformed Truss", GH_ParamAccess.list);
+			pManager.AddNumberParameter("Element Stress", "element stress", "Element Stress", GH_ParamAccess.list);
 		}
 
 		protected override void SolveInstance(IGH_DataAccess DA)
@@ -148,7 +149,7 @@ namespace TrussDeformation
 					{
 						if (rNode == node2)
 						{
-							// Add restraint data
+							// Add constraint data
 							node2.ConstraintX = rNode.ConstraintX;
 							node2.ConstraintY = rNode.ConstraintY;
 							node2.ConstraintZ = rNode.ConstraintZ;
@@ -206,14 +207,26 @@ namespace TrussDeformation
 				forceVector[i*3+2] = trussNodes[i].ForceZ;
 
 				// Boundary vector
-				if(trussNodes[i].ConstraintX != null)
+				for(int j = 0; j < 3; j++)
 				{
-					boundaryDofs.AddRange(trussNodes[i].Dofs);
-					boundaryConstraints.Add(trussNodes[i].ConstraintX);
-					boundaryConstraints.Add(trussNodes[i].ConstraintY);
-					boundaryConstraints.Add(trussNodes[i].ConstraintZ);
-				}
+					if (j == 0 && trussNodes[i].ConstraintX != null)
+					{
+						boundaryDofs.Add(trussNodes[i].Dofs[j]);
+						boundaryConstraints.Add(trussNodes[i].ConstraintX);
+					}
+					else if (j == 1 && trussNodes[i].ConstraintY != null)
+					{
+						boundaryDofs.Add(trussNodes[i].Dofs[j]);
+						boundaryConstraints.Add(trussNodes[i].ConstraintY);
+					}
+							
+					else if (j == 2 && trussNodes[i].ConstraintZ != null)
+					{
+						boundaryDofs.Add(trussNodes[i].Dofs[j]);
+						boundaryConstraints.Add(trussNodes[i].ConstraintZ);
+						}	
 
+				}
 			}
 
 			// Loop trough each element, compute local stiffness matrix and assemble into global stiffness matrix
@@ -237,7 +250,8 @@ namespace TrussDeformation
 			Solver solver = new Solver();
 			LinearAlgebra.Vector<double> displacements = solver.solveEquations(K, forceVector, boundaryDofs, boundaryConstraints.Cast<double>().ToList());
 
-			// Save the displacement for each node
+			// Save the displacement for each node and calculate the stress in each bar
+			List<double> elemStress = new List<double> { };
 			for (int i = 0; i < nElem; i++)
 			{
 				double disp1 = displacements[eDof[i][0]];
@@ -250,10 +264,13 @@ namespace TrussDeformation
 				Point3d newPoint1 = new Point3d(disp1 * scaleFactor, disp2 * scaleFactor, disp3 * scaleFactor);
 				Point3d newPoint2 = new Point3d(disp4 * scaleFactor, disp5 * scaleFactor, disp6 * scaleFactor);
 
-				// Tranlate original points
+				// Translate original points
 				trussBars[i].Nodes[0].Point = trussBars[i].Nodes[0].Point + newPoint1;
 				trussBars[i].Nodes[1].Point = trussBars[i].Nodes[1].Point + newPoint2;
 
+				// Calculate element stress
+				elemStress.Add(trussBars[i].ComputeStress(new List<double>{ disp1, disp2, disp3, disp4, disp5, disp6}));
+				
 			}
 
 			// Return the deformed lines
@@ -263,6 +280,7 @@ namespace TrussDeformation
 				deformedLines.Add(new Line(bar.Nodes[0].Point, bar.Nodes[1].Point));
 			}
 			DA.SetDataList("Deformed Truss", deformedLines);
+			DA.SetDataList("Element Stress", elemStress);
 
 		}
 

@@ -27,6 +27,7 @@ namespace TrussDeformation
 			pManager.AddNumberParameter("Constraint in x", "constraint in x", "True if restrained in x direction", GH_ParamAccess.list);
 			pManager.AddNumberParameter("Constraint in y", "constraint in y", "True if restrained in y direction", GH_ParamAccess.list);
 			pManager.AddNumberParameter("Constraint in z", "constraint in z", "True if restrained in z direction", GH_ParamAccess.list);
+
 		}
 
 		/// <summary>
@@ -56,9 +57,28 @@ namespace TrussDeformation
 			// Create a restraint node object and store it in a list
 			List<ContstraintNode> nodes = new List<ContstraintNode>();
 
+			double? constraintxI = null;
+			double? constraintyI = null;
+			double? constraintzI = null;
+
 			for (int i = 0; i < points.Count; i++)
-			{	
-				nodes.Add(new ContstraintNode(points[i], constraintx[i], constrainty[i], constraintz[i]));
+			{
+				if (!double.IsNaN(constraintx[i]))
+				{
+					constraintxI = constraintx[i];
+				}
+				if (!double.IsNaN(constrainty[i]))
+				{
+					constraintyI = constrainty[i];
+				}
+				if (!double.IsNaN(constraintz[i]))
+				{
+					constraintzI = constraintz[i];
+				}
+
+
+				nodes.Add(new ContstraintNode(points[i], constraintxI, constraintyI, constraintzI));
+
 			}
 
 			DA.SetDataList("constraintNode", nodes);

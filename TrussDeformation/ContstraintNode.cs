@@ -17,9 +17,9 @@ namespace TrussDeformation
 
 		// Constructor
 		public ContstraintNode(Point3d point,
-					double constraintx,
-					double constrainty,
-					double constraintz)
+					double? constraintx,
+					double? constrainty,
+					double? constraintz)
 		{
 			Point = point;
 			ConstraintX = constraintx;

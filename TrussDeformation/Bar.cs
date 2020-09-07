@@ -17,6 +17,8 @@ namespace TrussDeformation
 		public double StiffnessModulus { get; set; } = 0.0;
 		public double ElemLength { get; set; } = 0.0;
 
+		private LinearAlgebra.Matrix<double> G = LinearAlgebra.Matrix<double>.Build.Dense(2,6);
+
 		// Constructor
 		public Bar(Node node1,
 				   Node node2,
@@ -49,7 +51,6 @@ namespace TrussDeformation
 			K[1, 1] = Area * StiffnessModulus / ElemLength;
 
 			// Tranform to global element stiffness matrix using transformation matrix G
-			LinearAlgebra.Matrix<double> G = LinearAlgebra.Matrix<double>.Build.Dense(2, 6);
 
 			double nxx = (x2 - x1) / ElemLength;
 			double nyx = (y2 - y1) / ElemLength;
@@ -62,10 +63,20 @@ namespace TrussDeformation
 			G[1, 4] = nyx;
 			G[1, 5] = nzx;
 
+
 			LinearAlgebra.Matrix<double> GT = G.Transpose();
 			LinearAlgebra.Matrix<double> KGlobal = (GT.Multiply(K)).Multiply(G);
 
 			return KGlobal;
+		}
+
+		public double ComputeStress(List<double> elemDisplacements)
+		{
+			LinearAlgebra.Vector<double> elemDispVector = LinearAlgebra.Vector<double>.Build.Dense(elemDisplacements.ToArray());
+
+			double N = StiffnessModulus * Area / ElemLength * LinearAlgebra.Vector<double>.Build.Dense(new double[] { -1, 1 }).DotProduct(G.Multiply(elemDispVector));
+
+			return N / Area;
 		}
 	}
 }
