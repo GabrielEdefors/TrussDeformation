@@ -28,7 +28,7 @@ namespace TrussDeformation
 		protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
 		{
 			pManager.AddGenericParameter("Line", "line", "Line of the bar", GH_ParamAccess.list);
-			pManager.AddGenericParameter("Restraint Nodes", "restraint nodes", "Restraint nodes objects", GH_ParamAccess.list);
+			pManager.AddGenericParameter("Constraint Nodes", "restraint nodes", "Constraint nodes objects", GH_ParamAccess.list);
 			pManager.AddGenericParameter("Load Nodes", "load nodes", "Load nodes objects", GH_ParamAccess.list);
 			pManager.AddNumberParameter("Area", "A", "Cross sectional area of the bar", GH_ParamAccess.list);
 			pManager.AddNumberParameter("Youngs Modulus", "E", "Stiffness of the bar", GH_ParamAccess.list);

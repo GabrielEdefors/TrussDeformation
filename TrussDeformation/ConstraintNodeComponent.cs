@@ -24,9 +24,9 @@ namespace TrussDeformation
 		protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
 		{
 			pManager.AddPointParameter("Point", "point", "The spatial representation of the node", GH_ParamAccess.list);
-			pManager.AddNumberParameter("Constraint in x", "constraint in x", "True if restrained in x direction", GH_ParamAccess.list);
-			pManager.AddNumberParameter("Constraint in y", "constraint in y", "True if restrained in y direction", GH_ParamAccess.list);
-			pManager.AddNumberParameter("Constraint in z", "constraint in z", "True if restrained in z direction", GH_ParamAccess.list);
+			pManager.AddNumberParameter("Constraint in x", "constraint in x", "Value of constraint in x, set NaN if no constraint", GH_ParamAccess.list);
+			pManager.AddNumberParameter("Constraint in y", "constraint in y", "Value of constraint in y, set NaN if no constraint", GH_ParamAccess.list);
+			pManager.AddNumberParameter("Constraint in z", "constraint in z", "Value of constraint in z, set NaN if no constraint", GH_ParamAccess.list);
 
 		}
 
@@ -57,12 +57,13 @@ namespace TrussDeformation
 			// Create a restraint node object and store it in a list
 			List<ContstraintNode> nodes = new List<ContstraintNode>();
 
-			double? constraintxI = null;
-			double? constraintyI = null;
-			double? constraintzI = null;
-
 			for (int i = 0; i < points.Count; i++)
 			{
+
+				double? constraintxI = null;
+				double? constraintyI = null;
+				double? constraintzI = null;
+
 				if (!double.IsNaN(constraintx[i]))
 				{
 					constraintxI = constraintx[i];
