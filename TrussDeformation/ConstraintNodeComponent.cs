@@ -8,9 +8,6 @@ namespace TrussDeformation
 {
 	public class ConstraintNodeComponent : GH_Component
 	{
-		/// <summary>
-		/// Initializes a new instance of the NodeComponent class.
-		/// </summary>
 		public ConstraintNodeComponent()
 		  : base("ConstraintNode", "ConstraintNode",
 			  "Creates a node object that adds constraint to a node",
@@ -18,9 +15,6 @@ namespace TrussDeformation
 		{
 		}
 
-		/// <summary>
-		/// Registers all the input parameters for this component.
-		/// </summary>
 		protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
 		{
 			pManager.AddPointParameter("Point", "point", "The spatial representation of the node", GH_ParamAccess.list);
@@ -30,18 +24,11 @@ namespace TrussDeformation
 
 		}
 
-		/// <summary>
-		/// Registers all the output parameters for this component.
-		/// </summary>
 		protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
 		{
 			pManager.AddGenericParameter("constraintNode", "constraintNode", "Node", GH_ParamAccess.list);
 		}
 
-		/// <summary>
-		/// This is the method that actually does the work.
-		/// </summary>
-		/// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
 		protected override void SolveInstance(IGH_DataAccess DA)
 		{
 			List<Point3d> points = new List<Point3d>();
@@ -86,20 +73,14 @@ namespace TrussDeformation
 
 		}
 
-
 		protected override System.Drawing.Bitmap Icon
 		{
 			get
 			{
-				//You can add image files to your project resources and access them like this:
-				// return Resources.IconForThisComponent;
 				return null;
 			}
 		}
 
-		/// <summary>
-		/// Gets the unique ID for this component. Do not change this ID after release.
-		/// </summary>
 		public override Guid ComponentGuid
 		{
 			get { return new Guid("0b8acc15-46c2-403a-829c-ea8ac6d0d087"); }

@@ -6,11 +6,6 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 using System.Linq;
 
-// In order to load the result of this wizard, you will also need to
-// add the output bin/ folder of this project to the list of loaded
-// folder in Grasshopper.
-// You can use the _GrasshopperDeveloperSettings Rhino command for that.
-
 namespace TrussDeformation
 {
 	public class TrussDeformationComponent : GH_Component
@@ -22,13 +17,10 @@ namespace TrussDeformation
 		{
 		}
 
-		/// <summary>
-		/// Registers all the input parameters for this component.
-		/// </summary>
 		protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
 		{
 			pManager.AddGenericParameter("Line", "line", "Line of the bar", GH_ParamAccess.list);
-			pManager.AddGenericParameter("Constraint Nodes", "restraint nodes", "Constraint nodes objects", GH_ParamAccess.list);
+			pManager.AddGenericParameter("Constraint Nodes", "constraint nodes", "Constraint nodes objects", GH_ParamAccess.list);
 			pManager.AddGenericParameter("Load Nodes", "load nodes", "Load nodes objects", GH_ParamAccess.list);
 			pManager.AddNumberParameter("Area", "A", "Cross sectional area of the bar", GH_ParamAccess.list);
 			pManager.AddNumberParameter("Youngs Modulus", "E", "Stiffness of the bar", GH_ParamAccess.list);
@@ -284,16 +276,10 @@ namespace TrussDeformation
 
 		}
 
-		/// <summary>
-		/// Provides an Icon for every component that will be visible in the User Interface.
-		/// Icons need to be 24x24 pixels.
-		/// </summary>
 		protected override System.Drawing.Bitmap Icon
 		{
 			get
 			{
-				// You can add image files to your project resources and access them like this:
-				//return Resources.IconForThisComponent;
 				return null;
 			}
 		}
